@@ -170,7 +170,7 @@ export default {
 
 .tabpanel {
   display: inline-block;
-  width: calc(100% - 7.5rem);
+  width: calc(100% - 8rem);
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -187,7 +187,7 @@ export default {
 }
 .codecmd-wrapper {
   float: right;
-  width: 7.5rem;
+  width: 8rem;
 }
 
 textarea {
