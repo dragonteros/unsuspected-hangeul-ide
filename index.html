@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>평범한 한글 IDE</title>
+    <script
+      src="https://kit.fontawesome.com/9e1b5b955a.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        background-color: rgb(2, 9, 12);
+        color: rgba(255, 255, 255, 0.7);
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <title>평범한 한글 IDE</title>
-  <script src="https://kit.fontawesome.com/9e1b5b955a.js" crossorigin="anonymous"></script>
-  <style>
-    body {
-      background-color: rgb(2, 9, 12);
-      color: rgba(255, 255, 255, 0.7);
-    }
+      button {
+        border: none;
+        background-color: transparent;
+        color: inherit;
+      }
 
-    button {
-      border: none;
-      background-color: transparent;
-      color: inherit;
-    }
-  </style>
-</head>
+      @media (min-width: 60rem) {
+        .center {
+          width: 60rem;
+          margin: 0 auto;
+        }
+      }
+    </style>
+  </head>
 
-<body>
-  <div id="app"></div>
-  <script src='./dist/build.js'></script>
-</body>
-
+  <body>
+    <div class="center">
+      <div id="app"></div>
+    </div>
+    <script src="./dist/build.js"></script>
+  </body>
 </html>

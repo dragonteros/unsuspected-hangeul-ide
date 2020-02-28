@@ -1,8 +1,8 @@
 <template>
   <nav>
-    <header style='overflow: hidden;'>
+    <header style="overflow: hidden;">
       파일
-      <span id='globalcmd-wrapper'>
+      <span id="globalcmd-wrapper">
         <button @click="addNode(true)">
           <i class="fas fa-plus"></i> 새 파일
         </button>
@@ -27,19 +27,19 @@
       </template>
 
       <template slot="toggle" slot-scope="{ node }">
-        <span v-if="!node.isLeaf">
+        <button v-if="!node.isLeaf" :aria-label="node.isExpanded? '접기': '펼치기'">
           <i v-if="node.isExpanded" class="fas fa-chevron-down"></i>
           <i v-else class="fas fa-chevron-right"></i>
-        </span>
+        </button>
       </template>
 
       <template slot="sidebar" slot-scope="{ node }">
         <span id="localcmd-wrapper">
           <button class="item-icon" @click.stop="rename(node)">
-            <i class="fas fa-edit"></i>
+            <i class="fas fa-edit" title="이름 바꾸기"></i>
           </button>
           <button class="item-icon" @click.stop="removeNode(node)">
-            <i class="fas fa-trash-alt"></i>
+            <i class="fas fa-trash-alt" title="삭제"></i>
           </button>
         </span>
       </template>
@@ -96,67 +96,72 @@ export default {
 
     /**** Handle events from drag&drop ****/
     isDescribedBy: function(node, position) {
-      if (!node.path) return false
-      const parentPath = node.path.slice(0, -1)
-      let maybeParentPath = position.node.path
-      if (position.placement !== 'inside') {
-        maybeParentPath = maybeParentPath.slice(0, -1)
+      if (!node.path) return false;
+      const parentPath = node.path.slice(0, -1);
+      let maybeParentPath = position.node.path;
+      if (position.placement !== "inside") {
+        maybeParentPath = maybeParentPath.slice(0, -1);
       }
-      return parentPath.toString() === maybeParentPath.toString()
+      return parentPath.toString() === maybeParentPath.toString();
     },
 
     inhabitants: function(position) {
-      if (position.placement === 'inside') {
-        return position.node.children || []
+      if (position.placement === "inside") {
+        return position.node.children || [];
       }
-      if(position.node.path.length === 1) {
-        return this.nodes
+      if (position.node.path.length === 1) {
+        return this.nodes;
       }
-      const parentPath = position.node.path.slice(0, -1)
-      const parent = this.$refs.slVueTree.getNode(parentPath)
-      return parent.children || []
+      const parentPath = position.node.path.slice(0, -1);
+      const parent = this.$refs.slVueTree.getNode(parentPath);
+      return parent.children || [];
     },
 
     isDuplicateAt: function(node, position) {
-      return this.inhabitants(position).some(n => n.title === node.title)
+      return this.inhabitants(position).some(n => n.title === node.title);
     },
 
     immigrationCheck: function(node, position) {
-      if (this.isDescribedBy(node, position)) return true // domestic
-      return !this.isDuplicateAt(node, position) // foreign
+      if (this.isDescribedBy(node, position)) return true; // domestic
+      return !this.isDuplicateAt(node, position); // foreign
     },
 
     beforeDrop: function(nodes, position, cancel) {
-      const names = nodes.map(node => node.title)
+      const names = nodes.map(node => node.title);
       if (names.some((name, i, arr) => arr.indexOf(name) !== i)) cancel();
       if (!nodes.every(node => this.immigrationCheck(node, position))) cancel();
     },
 
     /**** Handle events from button click ****/
     inputName: function(msg, virtualNode, position) {
-      const defaultName = virtualNode.title
-      var rejectMsg = ''
+      const defaultName = virtualNode.title;
+      var rejectMsg = "";
       do {
         var title = prompt(rejectMsg + msg, defaultName);
-        if (!title || title === defaultName) return '';
-        if (['.', '..'].indexOf(title) !== -1) {
-          rejectMsg = "'" + title + "'은 사용할 수 없는 이름입니다. 다른 이름으로 해주세요.\n"
-          continue
-        } else if (title.indexOf('/') !== -1 || title.indexOf('\\') !== -1) {
-          rejectMsg = "'/'이나 '\\'은 이름에 사용할 수 없습니다. 다른 이름으로 해주세요.\n"
-          continue
-        } else rejectMsg =
-          "'" + title + "'은(는) 이미 있습니다. 다른 이름으로 해주세요.\n";
-        virtualNode.title = title
+        if (!title || title === defaultName) return "";
+        if ([".", ".."].indexOf(title) !== -1) {
+          rejectMsg =
+            "'" +
+            title +
+            "'은 사용할 수 없는 이름입니다. 다른 이름으로 해주세요.\n";
+          continue;
+        } else if (title.indexOf("/") !== -1 || title.indexOf("\\") !== -1) {
+          rejectMsg =
+            "'/'이나 '\\'은 이름에 사용할 수 없습니다. 다른 이름으로 해주세요.\n";
+          continue;
+        } else
+          rejectMsg =
+            "'" + title + "'은(는) 이미 있습니다. 다른 이름으로 해주세요.\n";
+        virtualNode.title = title;
       } while (this.isDuplicateAt(virtualNode, position));
-      return title
+      return title;
     },
 
     rename: function(node) {
       const msg = "'" + node.title + "'을(를) 다음 이름으로 변경합니다.";
-      const virtualNode = {title: node.title, path:node.path}
-      const position = {node: node, placement: 'before'}
-      var title = this.inputName(msg, virtualNode, position)
+      const virtualNode = { title: node.title, path: node.path };
+      const position = { node: node, placement: "before" };
+      var title = this.inputName(msg, virtualNode, position);
       if (!title) return;
       this.$refs.slVueTree.updateNode(node.path, { title: title });
       if (node.data.regId !== undefined) {
@@ -170,20 +175,20 @@ export default {
     },
 
     makePosition: function(node) {
-      if (!node) node = {path: []}
+      if (!node) node = { path: [] };
       const position = { node: node };
       position.placement = node.isLeaf ? "before" : "inside";
       return position;
     },
 
     positionToPath: function(position) {
-      let path = position.node.path.slice()
-      if (position.placement === 'inside') {
-        path.push(position.node.children.length || 0)
-      } else if (position.placement === 'after') {
-        path.push(path.pop()+1)
+      let path = position.node.path.slice();
+      if (position.placement === "inside") {
+        path.push(position.node.children.length || 0);
+      } else if (position.placement === "after") {
+        path.push(path.pop() + 1);
       }
-      return path
+      return path;
     },
 
     addNode: function(isLeaf) {
@@ -192,25 +197,27 @@ export default {
 
       const msg =
         "새로 만들 " + (isLeaf ? "파일" : "폴더") + "의 이름을 정해주세요.";
-      const virtualNode = {title: ''}
-      var title = this.inputName(msg, virtualNode, position)
+      const virtualNode = { title: "" };
+      var title = this.inputName(msg, virtualNode, position);
       if (!title) return;
 
-      const newNode = createNode(title, isLeaf)
+      const newNode = createNode(title, isLeaf);
       if (selected) {
-        var newPath = this.positionToPath(position)
+        var newPath = this.positionToPath(position);
         this.$refs.slVueTree.insert(position, newNode);
       } else {
-        var newPath = [this.nodes.length]
+        var newPath = [this.nodes.length];
         this.nodes.push(newNode);
       }
       this.$refs.slVueTree.select(newPath);
     },
 
     removeNode: function(node) {
-      const response = confirm("'" + node.title + "'을 삭제합니다.\n삭제하면 되돌릴 수 없습니다.");
+      const response = confirm(
+        "'" + node.title + "'을 삭제합니다.\n삭제하면 되돌릴 수 없습니다."
+      );
       if (response) {
-        this.recursivelyEmitRemove(node)
+        this.recursivelyEmitRemove(node);
         this.$refs.slVueTree.remove([node.path]);
       }
     },
@@ -222,7 +229,7 @@ export default {
           this.close(node.data.regId);
         }
       } else {
-        node.children.forEach(this.recursivelyEmitRemove.bind(this))
+        node.children.forEach(this.recursivelyEmitRemove.bind(this));
       }
     },
 
@@ -296,5 +303,14 @@ export default {
 #globalcmd-wrapper {
   float: right;
   height: 2rem;
+}
+
+.screen-reader-only {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 </style>

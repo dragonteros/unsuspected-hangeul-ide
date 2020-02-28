@@ -193,6 +193,7 @@ export default {
 textarea {
   background-color: #333;
   font-family: serif;
+  font-size: 1.1rem;
   border: none;
   color: white;
 }

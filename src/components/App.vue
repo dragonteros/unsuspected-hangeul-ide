@@ -65,7 +65,7 @@ export default {
 </script>
 
 <style>
-@media (min-width: 21rem) {
+@media (min-width: 30rem) {
   #filepanel {
     width: 20rem;
     float: left;
