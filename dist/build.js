@@ -13636,7 +13636,7 @@ exports.push([module.i, ".sl-vue-tree{position:relative;cursor:default;-webkit-t
 "use strict";
 /* harmony default export */ __webpack_exports__["a"] = ([{
     title: '조각글', isExpanded: true, children: [{
-        title: '문자만드는평범코드드립니다.txt', isLeaf: true, data: {
+        title: '문자만드는평범코드드립니다.pbhhg', isLeaf: true, data: {
             content: `import (ㅂ ㅂ ㅂㅎㄷ)  # bytes codec
 import (조각글 평범숫자 ㅂㅎㄷ)
 
@@ -13665,36 +13665,28 @@ import (조각글 평범숫자 ㅂㅎㄷ)
 ㄱㅀㄷ
 
 ㅎㅎㄷ  # /import` }
-    }, { title: '절댓값.txt', isLeaf: true, data: { content: `ㄱ ㅇㄱ (ㄴㄱ ㄴ ㄱ ㅇㄱ ㄱ ㅈ ㅎㄷ ㅎㄷ) ㄱ ㅎㄷ ㅎ` } }, {
-        title: '팔로나눈나머지.txt', isLeaf: true, data: {
-            content: `[ def integer_division_by_8 (x):
-    x_times_125_str = ㄱㅇㄱ ㅂㅈㄴ(125) ㄱㅎㄷ ㅁㅈㅎㄴ
-    ㄺ ㅂㅈㅎㄷ
-    [ def safe_to_int(string):
-        ㄱ
-        ㄱㅇㄱ ㅅㅅㅎㄴ
-        (ㄱㅇㄱ ㅁㅈㅎㄱ ㄶㄷ)ㅎㄷ
-    ㅎ]
-    ㅎㄴ
-    ㅂ ㄺ ㅅㅎㄷ ㄱㅎㄷ
-ㅎ]` }
     }, {
-        title: '팔로나눈몫.txt', isLeaf: true, data: {
-            content: `[ def integer_division_by_8 (x):
-    x_times_125_str = ㄱㅇㄱ ㅂㅈㄴ(125) ㄱㅎㄷ ㅁㅈㅎㄴ
-    ㄱ ㄺ ㅂㅈㅎㄹ
-    [ def safe_to_int(string):
-        ㄱ
-        ㄱㅇㄱ ㅅㅅㅎㄴ
-        (ㄱㅇㄱ ㅁㅈㅎㄱ ㄶㄷ)ㅎㄷ
-    ㅎ]
-    ㅎㄴ
+        title: '빠른정렬.pbhhg', isLeaf: true, data: {
+            content: `[ def quick_sort (arr):
+  # if len(arr) > 0:
+    ㄱ ㄱㅇㄱㅎㄴ  # pivot = arr[0]
+    ㄱㅇㄱ ㄴ ㅂㅈㅎㄷ  # slice = arr[1:]
+    [ def _(pivot, slice):
+      # [x for x in slice if x < pivot]
+      ㄴㅇㄱ (ㄱㅇㄱ ㄱㅇㄴ ㅈㅎㄷㅎ)ㅅㅂㅎㄷ
+      # [pivot]
+      ㄱㅇㄱ ㅁㄹㅎㄴ
+      # [x for x in slice if x >= pivot]
+      ㄴㅇㄱ (ㄱㅇㄱ ㄱㅇㄴ ㅈㅎㄷ ㅁㅎㄴㅎ)ㅅㅂㅎㄷ
+      ㄷㅎㄹ  # return [..]+[..]+[..]
+    ㅎ] ㅎㄷ  # return _(pivot, slice)
+  # else:
+    ㄱㅇㄱ  # return arr
+  (ㄱ ㄱㅇㄱ ㅈㄷㅎㄴ ㅈㅎㄷ)ㅎㄷ  # endif
 ㅎ]` }
-    }, {
-        title: '평범숫자.txt', isLeaf: true, data: {
+    }, { title: '절댓값.pbhhg', isLeaf: true, data: { content: `ㄱ ㅇㄱ (ㄴㄱ ㄴ ㄱ ㅇㄱ ㄱ ㅈ ㅎㄷ ㅎㄷ) ㄱ ㅎㄷ ㅎ` } }, {
+        title: '평범숫자.pbhhg', isLeaf: true, data: {
             content: `import (조각글 절댓값 ㅂㅎㄷ)
-import (조각글 팔로나눈몫 ㅂㅎㄷ)
-import (조각글 팔로나눈나머지 ㅂㅎㄷ)
 import (조각글 표 ㅂㅎㄷ)
 
 [ def encode_number(number):
@@ -13703,10 +13695,10 @@ import (조각글 표 ㅂㅎㄷ)
     [ def to_oct(to_parse, parsed):
         ㄴㅇㄱ
 
-        ㄱㅇㄱ ㄴㅇㄴㄱㅎㄴ  # quotient..next to_parse
-        ㄱㅇㄱ ㄷㅇㄴㄱㅎㄴ  # remainder
+        ㄱㅇㄱ ㄱㄴㄱ ㄴㄴㅎㄷ  # quotient..next to_parse
+        ㄱㅇㄱ ㄱㄴㄱ ㄴㅁㅎㄷ  # remainder
         [ def _(remainder):
-            ㄴㅇㄴ (ㄱㅇㄱ ㄹㅇㄴㄱㅎㄴ) ㄷㅎㄷ  # next parsed
+            ㄴㅇㄴ (ㄱㅇㄱ ㄴㅇㄴㄱㅎㄴ) ㄷㅎㄷ  # next parsed
         ㅎ]
         ㅎㄴ
         ㄱㅇㅎㄷ
@@ -13719,7 +13711,7 @@ import (조각글 표 ㅂㅎㄷ)
         ㄱㅇㄱ
 
         '' ㅁㅈㅎㄱ
-        'ㄱ' ㄹㅇㄴㄱㅎㄴ
+        'ㄱ' ㄴㅇㄴㄱㅎㄴ
         is_negative = ㄱㅇㄴ ㄱ ㅈㅎㄷ
         is_even_lengthed = ㄴㄱ ㄱㅇㄱ ㅈㄷㅎㄴ ㅅㅎㄷ ㄴ ㄶㄷ
         ㄶㄷ
@@ -13730,8 +13722,8 @@ import (조각글 표 ㅂㅎㄷ)
     ㅎㄴ
 ㅎ]
 
-ㅎㅎㅁ  # /import` }
-    }, { title: '표.txt', isLeaf: true, data: { content: `(ㅂ ㅂ ㅂㅎㄷ) ㄴㅅㅁㄱㄹㄱㅂㄴㄴㅅㅁㄹㄹㄷㅁㄴㄴㅈㅁㄱㄹㄷㄱㄷㄴㅅㄱㄴㅁㄷㅁㄴㅂㄱㅂㄱㄹㄱㄷㄷㄴㅅㄱ (ㄴ ㄱㄷㄱ ㄱㅇㄱㅎㄷ) (ㄱ ㄷ ㄱㅇㄱㅎㄷ) ㄴㄱㅎㄷㅎㄴ ㅎㅎㄴ` } }]
+ㅎㅎㄷ  # /import` }
+    }, { title: '표.pbhhg', isLeaf: true, data: { content: `(ㅂ ㅂ ㅂㅎㄷ) ㄴㅅㅁㄱㄹㄱㅂㄴㄴㅅㅁㄹㄹㄷㅁㄴㄴㅈㅁㄱㄹㄷㄱㄷㄴㅅㄱㄴㅁㄷㅁㄴㅂㄱㅂㄱㄹㄱㄷㄷㄴㅅㄱ (ㄴ ㄱㄷㄱ ㄱㅇㄱㅎㄷ) (ㄱ ㄷ ㄱㅇㄱㅎㄷ) ㄴㄱㅎㄷㅎㄴ ㅎㅎㄴ` } }]
 }]);
 
 /***/ }),
