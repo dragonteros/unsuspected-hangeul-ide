@@ -16,17 +16,9 @@ export class ExplorerExtension implements IExtension {
   }
 
   activate(extensionCtx: IExtensionService): void {
-    editorTreeController.handleCloseEditorTree();
-    editorTreeController.handleCloseAllEditorTree();
-    editorTreeController.handleCloseOthersEditorTree();
     editorTreeController.handleCloseSavedEditorTree();
     editorTreeController.handleSaveAllEditorTree();
 
-    editorController.handleCloseAllEditor();
-    editorController.handleCloseOtherEditor();
-    editorController.handleCloseToLeftEditor();
-    editorController.handleCloseToRightEditor();
-    editorController.handleCloseTabEditor();
     editorController.handleUpdateTabEditor();
   }
 
