@@ -2,16 +2,18 @@ import molecule from "@dtinsight/molecule";
 import { UniqueId } from "@dtinsight/molecule/esm/common/types";
 import { IExtension } from "@dtinsight/molecule/esm/model/extension";
 import { IExtensionService } from "@dtinsight/molecule/esm/services";
-import { EDITOR_ACTION_LAUNCH, launchConsolePanel } from "./base";
+import { launchConsolePanel } from "../../launcher/base";
+import { save } from "../common/index";
+import { EDITOR_ACTION_LAUNCH, EDITOR_ACTION_SAVE } from "./base";
 
-export class LauncherExtension implements IExtension {
+export class EditorActionExtension implements IExtension {
   id: string = "";
   name: string = "";
   consoleIds: UniqueId[];
 
   constructor(
-    id: string = "LauncherExtension",
-    name: string = "Launcher Extension"
+    id: string = "EditorActionExtension",
+    name: string = "Editor Action Extension"
   ) {
     this.id = id;
     this.name = name;
@@ -29,13 +31,18 @@ export class LauncherExtension implements IExtension {
     );
     molecule.editor.setDefaultActions([
       { ...EDITOR_ACTION_LAUNCH },
-      ...builtInEditorInitialActions?.value,
+      { ...EDITOR_ACTION_SAVE },
+      builtInEditorInitialActions?.value[0],
     ]);
   }
 
   onClickAction() {
     molecule.editor.onActionsClick(async (menuId, current) => {
       switch (menuId) {
+        case EDITOR_ACTION_SAVE.id:
+          if (current.tab == null) return;
+          save(current.tab);
+          break;
         case EDITOR_ACTION_LAUNCH.id:
           const fileId = current.tab?.id;
           if (fileId == null) return;

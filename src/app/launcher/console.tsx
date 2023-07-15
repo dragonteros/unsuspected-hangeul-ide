@@ -1,5 +1,5 @@
 import React from "react";
-import { Session } from "../../core/session";
+import { Session } from "../core/session";
 import Xterm from "./xterm";
 
 type ConsoleProps = {

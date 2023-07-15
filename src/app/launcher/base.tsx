@@ -1,18 +1,7 @@
 import { UniqueId } from "@dtinsight/molecule/esm/common/types";
-import { IEditorActionsProps, IPanelItem } from "@dtinsight/molecule/esm/model";
-import { Session } from "../../core/session";
+import { IPanelItem } from "@dtinsight/molecule/esm/model";
+import { Session } from "../core/session";
 import { Console } from "./console";
-
-export const EDITOR_ACTION_LAUNCH_ID = "launchConsole";
-
-export const EDITOR_ACTION_LAUNCH: IEditorActionsProps = {
-  id: EDITOR_ACTION_LAUNCH_ID,
-  name: "launch",
-  icon: "play",
-  place: "outer",
-  disabled: false,
-  title: "실행",
-};
 
 export function launchConsolePanel(
   id: UniqueId,

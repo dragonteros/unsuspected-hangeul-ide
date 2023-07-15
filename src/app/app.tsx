@@ -1,16 +1,16 @@
 import molecule, { create, Workbench } from "@dtinsight/molecule";
 import "@dtinsight/molecule/esm/style/mo.css";
+import { EditorActionExtension } from "./extension/editor-action-extension";
 import { ExplorerExtension } from "./extension/explorer-extension";
 import { FileSystemExtension } from "./extension/file-system-extension";
 import { KeybindingExtension } from "./extension/keybinding-extension";
-import { LauncherExtension } from "./extension/launcher-extension";
 
 const moInstance = create({
   extensions: [
     new ExplorerExtension(),
     new FileSystemExtension(),
-    new LauncherExtension(),
     new KeybindingExtension(),
+    new EditorActionExtension(),
   ],
 });
 
@@ -28,6 +28,7 @@ moInstance.onBeforeLoad(() => {
   molecule.layout.toggleMenuBarVisibility();
   molecule.layout.toggleActivityBarVisibility();
   // molecule.layout.togglePanelVisibility();
+  molecule.explorer.getState().data[0].toolbar?.shift(); // no toggle vertical
 });
 
 export default function App() {
