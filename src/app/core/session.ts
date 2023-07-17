@@ -37,7 +37,7 @@ export class Session {
     const loadUtils = getLoadUtils(_stdin, _stdout, _stderr);
 
     this.abortController = new AbortController();
-    const task = new Promise<number>((resolve, reject) => {
+    const task = new Promise<string[]>((resolve, reject) => {
       const abortListener = (e: Event) => {
         this.abortController.signal.removeEventListener("abort", abortListener);
         reject(
@@ -49,16 +49,23 @@ export class Session {
       this.abortController.signal.addEventListener("abort", abortListener);
 
       import("unsuspected-hangeul")
-        .then((pbhhg) => pbhhg.run(filepath, program, [], ioUtils, loadUtils))
+        .then((pbhhg) => pbhhg.main(filepath, program, ioUtils, loadUtils))
         .then(resolve)
         .catch(reject);
     })
-      .then((exitCode: number) => {
+      .then((result: string[]) => {
         loadUtils.onDestroy();
+        const output = [];
+        if (result.length > 1) {
+          output.push(
+            `\n[!] 주의: 한 줄에 ${result.length}개의 객체를 해석했습니다.`
+          );
+        }
+        output.push("\n결과: " + result.join(" "));
         this.write([
           {
             type: "ordinary",
-            data: `\n[프로그램이 종료되었습니다. 종료 코드: ${exitCode}]`,
+            data: output.join(""),
           },
         ]);
       })
