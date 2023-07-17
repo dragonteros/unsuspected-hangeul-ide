@@ -1,3 +1,4 @@
+import { Session } from "@/app/core/session";
 import molecule from "@dtinsight/molecule";
 import { UniqueId } from "@dtinsight/molecule/esm/common/types";
 import { IExtension } from "@dtinsight/molecule/esm/model/extension";
@@ -9,7 +10,7 @@ import { EDITOR_ACTION_LAUNCH, EDITOR_ACTION_SAVE } from "./base";
 export class EditorActionExtension implements IExtension {
   id: string = "";
   name: string = "";
-  consoleIds: UniqueId[];
+  sessions: Record<UniqueId, Session>;
 
   constructor(
     id: string = "EditorActionExtension",
@@ -17,12 +18,17 @@ export class EditorActionExtension implements IExtension {
   ) {
     this.id = id;
     this.name = name;
-    this.consoleIds = [];
+    this.sessions = {};
   }
 
   activate(extensionCtx: IExtensionService): void {
     this.initUI();
     this.onClickAction();
+
+    molecule.panel.onTabClose((key) => {
+      this.sessions[key]?.abortController.abort("패널 닫힘");
+      delete this.sessions[key];
+    });
   }
 
   initUI() {
@@ -48,15 +54,16 @@ export class EditorActionExtension implements IExtension {
           if (fileId == null) return;
           const filepath: string = (current.tab as any).location;
 
-          const consolePanel = launchConsolePanel(
-            fileId,
-            filepath,
-            current.tab?.data.value
-          );
-          if (this.consoleIds.indexOf(consolePanel.id) === -1) {
-            this.consoleIds.push(consolePanel.id);
+          const panelId = `console-${fileId}`;
+          if (!(panelId in this.sessions)) {
+            const [consolePanel, session] = launchConsolePanel(
+              panelId,
+              filepath,
+              current.tab?.data.value
+            );
+            this.sessions[panelId] = session;
+            molecule.panel.open(consolePanel);
           }
-          molecule.panel.open(consolePanel);
           break;
         default:
           break;
@@ -65,8 +72,9 @@ export class EditorActionExtension implements IExtension {
   }
 
   dispose(extensionCtx: IExtensionService): void {
-    for (const panelId of this.consoleIds) {
+    for (const [panelId, session] of Object.entries(this.sessions)) {
       molecule.panel.remove(panelId);
+      session.abortController.abort("확장 비활성화");
     }
   }
 }

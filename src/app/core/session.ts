@@ -12,6 +12,7 @@ import {
 
 export class Session {
   public stdin: ITransferProtocol;
+  public abortController: AbortController;
 
   private previousLines: string = "";
   private activeLine: string = "";
@@ -35,9 +36,25 @@ export class Session {
     };
     const loadUtils = getLoadUtils(_stdin, _stdout, _stderr);
 
-    import("unsuspected-hangeul")
-      .then((pbhhg) => pbhhg.run(filepath, program, [], ioUtils, loadUtils))
+    this.abortController = new AbortController();
+    const task = new Promise<number>((resolve, reject) => {
+      const abortListener = (e: Event) => {
+        this.abortController.signal.removeEventListener("abort", abortListener);
+        reject(
+          e.target != null && "reason" in e.target
+            ? e.target.reason
+            : "알 수 없는 이유로 중단되었습니다."
+        );
+      };
+      this.abortController.signal.addEventListener("abort", abortListener);
+
+      import("unsuspected-hangeul")
+        .then((pbhhg) => pbhhg.run(filepath, program, [], ioUtils, loadUtils))
+        .then(resolve)
+        .catch(reject);
+    })
       .then((exitCode: number) => {
+        loadUtils.onDestroy();
         this.write([
           {
             type: "ordinary",
@@ -46,6 +63,7 @@ export class Session {
         ]);
       })
       .catch((error: Error | string) => {
+        loadUtils.onDestroy();
         this.write([
           {
             type: "ordinary",

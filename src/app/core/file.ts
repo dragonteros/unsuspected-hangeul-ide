@@ -1,3 +1,4 @@
+import molecule from "@dtinsight/molecule";
 import { UniqueId } from "@dtinsight/molecule/esm/common/types";
 import { IFolderTreeNodeProps } from "@dtinsight/molecule/esm/model";
 import { VirtualFile } from "./io";
@@ -52,9 +53,9 @@ export class FileIO {
   private isClosed: boolean;
 
   constructor(
-    private fs: FileSystem,
-    private fileId: UniqueId,
-    flags: "r" | "w" | "a" | "r+" | "w+" | "a+"
+    protected fs: FileSystem,
+    protected fileId: UniqueId,
+    public flags: "r" | "w" | "a" | "r+" | "w+" | "a+"
   ) {
     this.isReadable = flags !== "w" && flags !== "a";
     this.isWritable = flags !== "r";
@@ -83,7 +84,12 @@ export class FileIO {
       throw Error("이 파일은 읽기 가능으로 열리지 않았습니다.");
 
     const file = this.fs.get(this.fileId);
-    return file.read(numBytes, this.cursor).buffer;
+    if (numBytes < 0) {
+      numBytes = file.buffer.byteLength - this.cursor;
+    }
+    const content = file.read(numBytes, this.cursor).buffer;
+    this.cursor += numBytes;
+    return content;
   }
 
   write(bytes: ArrayBuffer): number {
@@ -91,7 +97,9 @@ export class FileIO {
       throw Error("이 파일은 쓰기 가능으로 열리지 않았습니다.");
 
     const file = this.fs.get(this.fileId);
-    return file.write(new Uint8Array(bytes), this.cursor);
+    const written = file.write(new Uint8Array(bytes), this.cursor);
+    this.cursor += bytes.byteLength;
+    return written;
   }
 
   seek(offset: number, whence: "SEEK_SET" | "SEEK_CUR"): number {
@@ -223,6 +231,8 @@ class FileSystem {
         throw Error(`지정 경로에 파일이 없습니다: ${path}`);
       }
       entry = this.create(path, "File");
+      const parent = this.findParentOf(path);
+      molecule.folderTree.add(entry, parent!.id);
     }
     if (!entry.isLeaf) throw Error(`지정 경로에 파일이 없습니다: ${path}`);
     if (entry.id in this.openedFiles)
@@ -260,36 +270,63 @@ class FileSystem {
 
 export const FILE_SYSTEM = new FileSystem();
 
+class FileWrapper extends FileIO {
+  constructor(wrapped: FileIO, private localRegistry: Set<UniqueId>) {
+    super((wrapped as any).fs, (wrapped as any).fileId, wrapped.flags);
+    localRegistry.add(this.fileId);
+  }
+  close() {
+    this.localRegistry.delete(this.fileId);
+    super.close();
+  }
+}
+class LoadUtilsWrapper {
+  private localRegistry: Set<UniqueId>;
+  constructor(
+    private stdin: VirtualFile,
+    private stdout: VirtualFile,
+    private stderr: VirtualFile
+  ) {
+    this.localRegistry = new Set();
+  }
+  open(pathOrFd: string | number, flags: "a" | "a+" | "r" | "r+" | "w" | "w+") {
+    if (pathOrFd === 0 && flags === "r") return this.stdin;
+    if (pathOrFd === 1 && (flags === "w" || flags === "a")) return this.stdout;
+    if (pathOrFd === 2 && (flags === "w" || flags === "a")) return this.stderr;
+    if (pathOrFd === 0 || pathOrFd === 1 || pathOrFd === 2)
+      throw Error("파일 접근 방식이 잘못되었습니다.");
+    if (typeof pathOrFd === "number")
+      throw Error("다음 파일 기술자에 연결된 파일이 없습니다: " + pathOrFd);
+    const file = FILE_SYSTEM.open(pathOrFd, flags);
+    return new FileWrapper(file, this.localRegistry);
+  }
+
+  load(path: string) {
+    return FILE_SYSTEM.load(path);
+  }
+  isFile(path: string) {
+    return FILE_SYSTEM.isFile(path);
+  }
+  listdir(path: string): string[] {
+    return FILE_SYSTEM.listdir(path);
+  }
+  joinPath(...paths: string[]): string {
+    return joinPath(...paths);
+  }
+  normalizePath(path: string): string {
+    return normalizePath(path);
+  }
+
+  onDestroy() {
+    for (const fileId of this.localRegistry) {
+      FILE_SYSTEM.close(fileId);
+    }
+  }
+}
 export function getLoadUtils(
   stdin: VirtualFile,
   stdout: VirtualFile,
   stderr: VirtualFile
 ) {
-  return {
-    open(
-      pathOrFd: string | number,
-      flags: "a" | "a+" | "r" | "r+" | "w" | "w+"
-    ) {
-      if (pathOrFd === 0 && flags === "r") return stdin;
-      if (pathOrFd === 1 && (flags === "w" || flags === "a")) return stdout;
-      if (pathOrFd === 2 && (flags === "w" || flags === "a")) return stderr;
-      if (pathOrFd === 0 || pathOrFd === 1 || pathOrFd === 2)
-        throw Error("파일 접근 방식이 잘못되었습니다.");
-      if (typeof pathOrFd === "number")
-        throw Error("다음 파일 기술자에 연결된 파일이 없습니다: " + pathOrFd);
-      return FILE_SYSTEM.open(pathOrFd, flags);
-    },
-
-    load(path: string) {
-      return FILE_SYSTEM.load(path);
-    },
-    isFile(path: string) {
-      return FILE_SYSTEM.isFile(path);
-    },
-    listdir(path: string): string[] {
-      return FILE_SYSTEM.listdir(path);
-    },
-    normalizePath,
-    joinPath,
-  };
+  return new LoadUtilsWrapper(stdin, stdout, stderr);
 }

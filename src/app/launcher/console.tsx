@@ -21,11 +21,18 @@ export function Console(props: ConsoleProps) {
       ref={xtermRef}
       onData={(data) => {
         const code = data.charCodeAt(0);
+        if (code === 3) {
+          props.session.abortController.abort(
+            "사용자 요청으로 중단되었습니다."
+          );
+          return;
+        }
         if (code === 4) {
           props.session.write([{ type: "end-of-document" }]);
           props.session.stdin.write([{ type: "end-of-document" }]);
           return;
         }
+
         if (code === 13) {
           data = "\r\n";
         } else if (code === 10 || code === 9) {

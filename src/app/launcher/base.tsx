@@ -7,18 +7,20 @@ export function launchConsolePanel(
   id: UniqueId,
   filepath: string,
   content: string
-): IPanelItem {
+): [IPanelItem, Session] {
   const segments = filepath.split("/");
   const filename = segments[segments.length - 1];
   const session = new Session(filepath, content);
 
-  const panelId = `console-${id}`;
-  return {
-    id: panelId,
-    name: `${filename} 실행`,
-    title: `${filename} 실행`,
-    renderPane: () => {
-      return <Console session={session} />;
+  return [
+    {
+      id,
+      name: `${filename} 실행`,
+      title: `${filename} 실행`,
+      renderPane: () => {
+        return <Console session={session} />;
+      },
     },
-  };
+    session,
+  ];
 }

@@ -59,6 +59,7 @@ export class VirtualFile {
 }
 export class BufferedReader extends VirtualFile {
   private buffer: TransferData[] = [];
+  private byteCursor = 0;
   private dataIncoming: AsyncEvent<void>;
   constructor(channel: ITransferProtocol) {
     super();
@@ -71,8 +72,10 @@ export class BufferedReader extends VirtualFile {
   }
 
   async read(numBytes: number): Promise<ArrayBuffer> {
+    const result = new Uint8Array(numBytes);
+
     const encoder = new TextEncoder();
-    let line = "";
+    const encodedBytes: Uint8Array[] = [];
     while (numBytes > 0) {
       await this.fillBuffer();
 
@@ -80,63 +83,87 @@ export class BufferedReader extends VirtualFile {
       if (item == null) break;
       if (item.type === "end-of-document") break;
       if (item.type === "backspace") {
-        line = line.slice(0, -1);
+        encodedBytes.pop();
         continue;
       }
 
+      const data = Array.from(item.data);
       let cursor = 0;
-      while (cursor < item.data.length) {
-        const delta = item.data[cursor];
-        const numBytesDelta = encoder.encode(delta).byteLength;
+      while (cursor < data.length) {
+        const delta = data[cursor];
+        const encoded = encoder.encode(delta);
+        const numBytesDelta = encoded.byteLength - this.byteCursor;
         if (numBytes < numBytesDelta) {
+          encodedBytes.push(encoded.slice(0, numBytes));
+          this.byteCursor = numBytes;
           numBytes = 0;
           break;
         }
         cursor += 1;
         numBytes -= numBytesDelta;
+        encodedBytes.push(encoded.slice(this.byteCursor));
+        this.byteCursor = 0;
       }
-      line += item.data.slice(0, cursor);
 
-      if (cursor < item.data.length) {
+      if (cursor < data.length) {
         this.buffer.unshift({
           type: "ordinary",
-          data: item.data.slice(cursor),
+          data: data.slice(cursor).join(""),
         });
       }
     }
-    return encoder.encode(line).buffer;
+
+    let written = 0;
+    for (const buf of encodedBytes) {
+      result.set(buf, written);
+      written += buf.byteLength;
+    }
+    return result.buffer;
   }
 
   async readLine(): Promise<string | undefined> {
-    let line = "";
+    const line: string[] = [];
     while (true) {
       await this.fillBuffer();
 
-      const item = this.buffer.shift();
+      let item = this.buffer.shift();
       if (item == null) break;
       if (item.type === "end-of-document") {
-        if (line === "") return undefined;
+        if (line.length === 0) return undefined;
         break;
       }
       if (item.type === "backspace") {
-        line = line.slice(0, -1);
+        line.pop();
         continue;
+      }
+
+      if (this.byteCursor > 0) {
+        const encoder = new TextEncoder();
+        const _data = Array.from(item.data);
+        const firstNumBytes = encoder.encode(_data[0]).byteLength;
+        let data = "";
+        for (let i = this.byteCursor; i < firstNumBytes; i++) data += "�";
+        item = {
+          type: "ordinary",
+          data: data + _data.slice(1).join(""),
+        };
+        this.byteCursor = 0;
       }
 
       const newlineIdx = item.data.indexOf("\n");
       if (newlineIdx !== -1) {
-        line += item.data.slice(0, newlineIdx);
+        line.push(...item.data.slice(0, newlineIdx));
         this.buffer.unshift({
           type: "ordinary",
           data: item.data.slice(newlineIdx + 1),
         });
         break;
       }
-      line += item.data;
+      line.push(...item.data);
     }
 
-    if (line.endsWith("\r")) line = line.slice(0, -1);
-    return line;
+    if (line[line.length - 1] === "\r") line.pop();
+    return line.join("");
   }
 
   onData(data: TransferData[]) {
